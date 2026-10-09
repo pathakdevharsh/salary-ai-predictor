@@ -23,28 +23,24 @@ st.title("💰 Employee Salary Prediction")
 st.write("Predict an estimated salary based on employee details.")
 st.divider()
 
-age = st.number_input("Age", min_value=18, max_value=70, value=25)
+age = st.number_input(
+    "Age", min_value=18, max_value=70, value=25
+)
 
 gender = st.selectbox(
-    "Gender",
-    ["Male", "Female", "Other"]
+    "Gender", ["Male", "Female", "Other"]
 )
 
 experience = st.number_input(
-    "Experience (Years)",
-    min_value=0,
-    max_value=50,
-    value=2
+    "Experience (Years)", min_value=0, max_value=50, value=2
 )
 
 education = st.selectbox(
-    "Education Level",
-    options["Education Level"]
+    "Education Level", options["Education Level"]
 )
 
 job_role = st.selectbox(
-    "Job Role",
-    options["Job Title"]
+    "Job Role", options["Job Title"]
 )
 
 if st.button("🔮 Predict Salary", use_container_width=True):
@@ -54,7 +50,7 @@ if st.button("🔮 Predict Salary", use_container_width=True):
         "Gender": [gender],
         "Education Level": [education],
         "Job Title": [job_role],
-        "Years of Experience": [experience]
+        "Experience (Years)": [experience]
     })
 
     try:
@@ -69,4 +65,3 @@ if st.button("🔮 Predict Salary", use_container_width=True):
     except Exception as e:
         st.error("Prediction failed. Full error:")
         st.code(repr(e))
-
