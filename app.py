@@ -1,4 +1,4 @@
-```python
+
 import streamlit as st
 import pandas as pd
 import joblib
@@ -98,4 +98,3 @@ if st.button("🔮 Predict Salary", use_container_width=True):
     except Exception as e:
         st.error("Prediction failed. Error details:")
         st.code(repr(e))
-```
