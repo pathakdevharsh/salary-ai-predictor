@@ -10,12 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-@st.cache_resource
-def load_model():
-    return joblib.load("salary_model.pkl")
-
-model = load_model()
-
+model = joblib.load("salary_model.pkl")
 with open("options.json", "r") as f:
     options = json.load(f)
 
