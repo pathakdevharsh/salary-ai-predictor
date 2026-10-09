@@ -1,4 +1,4 @@
-
+```python
 import streamlit as st
 import pandas as pd
 import joblib
@@ -24,23 +24,32 @@ st.write("Predict an estimated salary based on employee details.")
 st.divider()
 
 age = st.number_input(
-    "Age", min_value=18, max_value=70, value=25
+    "Age",
+    min_value=18,
+    max_value=70,
+    value=25
 )
 
 gender = st.selectbox(
-    "Gender", ["Male", "Female", "Other"]
+    "Gender",
+    ["Male", "Female", "Other"]
 )
 
 experience = st.number_input(
-    "Experience (Years)", min_value=0, max_value=50, value=2
+    "Experience (Years)",
+    min_value=0,
+    max_value=50,
+    value=2
 )
 
 education = st.selectbox(
-    "Education Level", options["Education Level"]
+    "Education Level",
+    options["Education Level"]
 )
 
 job_role = st.selectbox(
-    "Job Role", options["Job Title"]
+    "Job Role",
+    options["Job Title"]
 )
 
 if st.button("🔮 Predict Salary", use_container_width=True):
@@ -57,11 +66,25 @@ if st.button("🔮 Predict Salary", use_container_width=True):
         prediction = model.predict(input_data)[0]
 
         st.subheader("Prediction Result")
-        st.success(f"💰 Estimated Salary: {prediction:,.2f}")
+
+        # Handle numerical salary predictions
+        try:
+            salary = float(prediction)
+            st.success(
+                f"💰 Estimated Salary: {salary:,.2f}"
+            )
+
+        except (ValueError, TypeError):
+            st.warning(f"Model output: {prediction}")
+            st.info(
+                "The model returned text instead of a numerical salary."
+            )
+
         st.caption(
             "This is a model-based estimate, not a guaranteed salary."
         )
 
     except Exception as e:
-        st.error("Prediction failed. Full error:")
+        st.error("Prediction failed. Error details:")
         st.code(repr(e))
+```
