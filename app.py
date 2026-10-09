@@ -1,4 +1,4 @@
-
+```python
 import streamlit as st
 import pandas as pd
 import joblib
@@ -14,10 +14,13 @@ st.set_page_config(
 def load_model():
     return joblib.load("salary_model.pkl")
 
-model = load_model()
+@st.cache_data
+def load_options():
+    with open("options.json", "r") as f:
+        return json.load(f)
 
-with open("options.json", "r") as f:
-    options = json.load(f)
+model = load_model()
+options = load_options()
 
 st.title("💰 Employee Salary Prediction")
 st.write("Predict an estimated salary based on employee details.")
@@ -54,25 +57,45 @@ job_role = st.selectbox(
 
 if st.button("🔮 Predict Salary", use_container_width=True):
 
-    input_data = pd.DataFrame({
-        "Age": [age],
-        "Gender": [gender],
-        "Education Level": [education],
-        "Job Title": [job_role],
-        "Years of Experience": [experience]
-    })
-
     try:
-        prediction = model.predict(input_data)[0]
-        salary = float(prediction)
+        # Get the exact feature names expected by the loaded model
+        expected_columns = list(model.feature_names_in_)
 
-        st.subheader("Prediction Result")
-        st.success(f"💰 Estimated Salary: ${salary:,.2f}")
+        values = {
+            "Age": age,
+            "Gender": gender,
+            "Education Level": education,
+            "Job Title": job_role,
+            "Years of Experience": experience,
+            "Experience (Years)": experience
+        }
 
-        st.caption(
-            "This is a model-based estimate, not a guaranteed salary."
-        )
+        # Build input using the model's exact column names
+        missing = [col for col in expected_columns if col not in values]
+
+        if missing:
+            st.error(f"Cannot match model input columns: {missing}")
+        else:
+            input_data = pd.DataFrame([
+                {col: values[col] for col in expected_columns}
+            ])
+
+            prediction = model.predict(input_data)[0]
+
+            if isinstance(prediction, str):
+                st.error(
+                    f"The loaded model predicts a category: {prediction}. "
+                    "Upload the trained numerical salary regression model."
+                )
+            else:
+                salary = float(prediction)
+                st.subheader("Prediction Result")
+                st.success(f"💰 Estimated Salary: ${salary:,.2f}")
+                st.caption(
+                    "This is a model-based estimate, not a guaranteed salary."
+                )
 
     except Exception as e:
         st.error("Prediction failed. Error details:")
         st.code(repr(e))
+```
