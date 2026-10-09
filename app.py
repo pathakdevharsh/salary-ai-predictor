@@ -1,4 +1,4 @@
-
+```python
 import streamlit as st
 import pandas as pd
 import joblib
@@ -59,26 +59,15 @@ if st.button("🔮 Predict Salary", use_container_width=True):
         "Gender": [gender],
         "Education Level": [education],
         "Job Title": [job_role],
-        "Experience (Years)": [experience]
+        "Years of Experience": [experience]
     })
 
     try:
         prediction = model.predict(input_data)[0]
+        salary = float(prediction)
 
         st.subheader("Prediction Result")
-
-        # Handle numerical salary predictions
-        try:
-            salary = float(prediction)
-            st.success(
-                f"💰 Estimated Salary: {salary:,.2f}"
-            )
-
-        except (ValueError, TypeError):
-            st.warning(f"Model output: {prediction}")
-            st.info(
-                "The model returned text instead of a numerical salary."
-            )
+        st.success(f"💰 Estimated Salary: ${salary:,.2f}")
 
         st.caption(
             "This is a model-based estimate, not a guaranteed salary."
@@ -87,3 +76,4 @@ if st.button("🔮 Predict Salary", use_container_width=True):
     except Exception as e:
         st.error("Prediction failed. Error details:")
         st.code(repr(e))
+```
