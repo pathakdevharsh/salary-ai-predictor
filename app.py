@@ -4,32 +4,36 @@ import pandas as pd
 import joblib
 import json
 
-# Load model
-model = joblib.load("salary_model.pkl")
-
-# Load options
-with open("options.json", "r") as f:
-    options = json.load(f)
-
-# Page settings
 st.set_page_config(
-    page_title="Salary Prediction",
+    page_title="Employee Salary Prediction",
     page_icon="💰",
     layout="centered"
 )
 
-# Title
+@st.cache_resource
+def load_model():
+    return joblib.load("salary_model.pkl")
+
+model = load_model()
+
+with open("options.json", "r") as f:
+    options = json.load(f)
+
 st.title("💰 Employee Salary Prediction")
-st.write("Predict Salary Category using Logistic Regression")
+st.write("Predict an estimated salary based on employee details.")
 
 st.divider()
 
-# User Inputs
 age = st.number_input(
     "Age",
     min_value=18,
     max_value=70,
     value=25
+)
+
+gender = st.selectbox(
+    "Gender",
+    ["Male", "Female", "Other"]
 )
 
 experience = st.number_input(
@@ -49,24 +53,17 @@ job_role = st.selectbox(
     options["Job Title"]
 )
 
-st.divider()
-
-# Prediction Button
 if st.button("🔮 Predict Salary", use_container_width=True):
-
     input_data = pd.DataFrame({
         "Age": [age],
-        "Experience (Years)": [experience],
+        "Gender": [gender],
         "Education Level": [education],
-        "Job Title": [job_role]
+        "Job Title": [job_role],
+        "Years of Experience": [experience]
     })
 
     prediction = model.predict(input_data)[0]
 
     st.subheader("Prediction Result")
-
-    if prediction == "High Salary":
-        st.success("💰 High Salary")
-    else:
-        st.warning("📉 Low Salary")
-        
+    st.success(f"💰 Estimated Salary: {prediction:,.2f}")
+    st.caption("This is a model-based estimate, not a guaranteed salary.")
