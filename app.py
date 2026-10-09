@@ -62,7 +62,22 @@ if st.button("🔮 Predict Salary", use_container_width=True):
         "Years of Experience": [experience]
     })
 
+   
+    st.write("Debug - Input columns:", input_data.columns.tolist())
+    st.write("Debug - Input data:", input_data)
+
+    input_data = input_data[
+        [
+            "Age",
+            "Gender",
+            "Education Level",
+            "Job Title",
+            "Years of Experience"
+        ]
+    ]
+
     prediction = model.predict(input_data)[0]
+
 
     st.subheader("Prediction Result")
     st.success(f"💰 Estimated Salary: {prediction:,.2f}")
