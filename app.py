@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 import json
+import os
 
 st.set_page_config(
     page_title="Employee Salary Prediction",
@@ -10,6 +11,7 @@ st.set_page_config(
     layout="centered"
 )
 
+# Load the model directly, without Streamlit caching
 @st.cache_resource
 def load_model():
     return joblib.load("salary_model.pkl")
@@ -26,41 +28,34 @@ st.title("💰 Employee Salary Prediction")
 st.write("Predict an estimated salary based on employee details.")
 st.divider()
 
+# Debug information
+st.write("Model type:", type(model).__name__)
+
+expected_columns = list(model.feature_names_in_)
+st.write("Expected columns:", expected_columns)
+
 age = st.number_input(
-    "Age",
-    min_value=18,
-    max_value=70,
-    value=25
+    "Age", min_value=18, max_value=70, value=25
 )
 
 gender = st.selectbox(
-    "Gender",
-    ["Male", "Female", "Other"]
+    "Gender", ["Male", "Female", "Other"]
 )
 
 experience = st.number_input(
-    "Experience (Years)",
-    min_value=0,
-    max_value=50,
-    value=2
+    "Experience (Years)", min_value=0, max_value=50, value=2
 )
 
 education = st.selectbox(
-    "Education Level",
-    options["Education Level"]
+    "Education Level", options["Education Level"]
 )
 
 job_role = st.selectbox(
-    "Job Role",
-    options["Job Title"]
+    "Job Role", options["Job Title"]
 )
 
 if st.button("🔮 Predict Salary", use_container_width=True):
-
     try:
-        # Get the exact feature names expected by the loaded model
-        expected_columns = list(model.feature_names_in_)
-
         values = {
             "Age": age,
             "Gender": gender,
@@ -70,31 +65,37 @@ if st.button("🔮 Predict Salary", use_container_width=True):
             "Experience (Years)": experience
         }
 
-        # Build input using the model's exact column names
-        missing = [col for col in expected_columns if col not in values]
+        missing = [
+            col for col in expected_columns
+            if col not in values
+        ]
 
         if missing:
-            st.error(f"Cannot match model input columns: {missing}")
+            st.error(f"Missing model inputs: {missing}")
         else:
-            input_data = pd.DataFrame([
-                {col: values[col] for col in expected_columns}
-            ])
+            input_data = pd.DataFrame([{
+                col: values[col] for col in expected_columns
+            }])
 
             prediction = model.predict(input_data)[0]
 
+            st.write("Raw model output:", repr(prediction))
+
             if isinstance(prediction, str):
                 st.error(
-                    f"The loaded model predicts a category: {prediction}. "
-                    "Upload the trained numerical salary regression model."
+                    "The uploaded model predicts a category, not salary. "
+                    "Replace salary_model.pkl with the verified regression model from Colab."
                 )
             else:
                 salary = float(prediction)
+
                 st.subheader("Prediction Result")
                 st.success(f"💰 Estimated Salary: ${salary:,.2f}")
+
                 st.caption(
                     "This is a model-based estimate, not a guaranteed salary."
                 )
 
     except Exception as e:
-        st.error("Prediction failed. Error details:")
+        st.error("Prediction failed:")
         st.code(repr(e))
