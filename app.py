@@ -10,21 +10,20 @@ st.set_page_config(
     layout="centered"
 )
 
-model = joblib.load("salary_model.pkl")
+@st.cache_resource
+def load_model():
+    return joblib.load("salary_model.pkl")
+
+model = load_model()
+
 with open("options.json", "r") as f:
     options = json.load(f)
 
 st.title("💰 Employee Salary Prediction")
 st.write("Predict an estimated salary based on employee details.")
-
 st.divider()
 
-age = st.number_input(
-    "Age",
-    min_value=18,
-    max_value=70,
-    value=25
-)
+age = st.number_input("Age", min_value=18, max_value=70, value=25)
 
 gender = st.selectbox(
     "Gender",
@@ -49,6 +48,7 @@ job_role = st.selectbox(
 )
 
 if st.button("🔮 Predict Salary", use_container_width=True):
+
     input_data = pd.DataFrame({
         "Age": [age],
         "Gender": [gender],
@@ -57,23 +57,16 @@ if st.button("🔮 Predict Salary", use_container_width=True):
         "Years of Experience": [experience]
     })
 
-   
-    st.write("Debug - Input columns:", input_data.columns.tolist())
-    st.write("Debug - Input data:", input_data)
+    try:
+        prediction = model.predict(input_data)[0]
 
-    input_data = input_data[
-        [
-            "Age",
-            "Gender",
-            "Education Level",
-            "Job Title",
-            "Years of Experience"
-        ]
-    ]
+        st.subheader("Prediction Result")
+        st.success(f"💰 Estimated Salary: {prediction:,.2f}")
+        st.caption(
+            "This is a model-based estimate, not a guaranteed salary."
+        )
 
-    prediction = model.predict(input_data)[0]
+    except Exception as e:
+        st.error("Prediction failed. Full error:")
+        st.code(repr(e))
 
-
-    st.subheader("Prediction Result")
-    st.success(f"💰 Estimated Salary: {prediction:,.2f}")
-    st.caption("This is a model-based estimate, not a guaranteed salary.")
